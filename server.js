@@ -1,25 +1,32 @@
-const express = require("express");
-const multer = require("multer");
-const ffmpeg = require("fluent-ffmpeg");
-const path = require("path");
-const fs = require("fs");
-const cors = require("cors"); // <-- CORS enabled
-const axios = require("axios");
-const { v4: uuidv4 } = require("uuid");
+// /server.js
+//Let's see
+
+import express from "express";
+import multer from "multer";
+import ffmpeg from "fluent-ffmpeg";
+import path from "path";
+import fs from "fs";
+import cors from "cors";
+import axios from "axios";
+import { v4 as uuidv4 } from "uuid";
 
 const app = express();
 const PORT = process.env.PORT || 10000;
 
 app.use(cors());
-app.use(express.json()); // <-- allows JSON body parsing
+app.use(express.json());
 const upload = multer({ dest: "uploads/" });
 
+// Ensure output folder exists
 const outputDir = path.join(__dirname, "output");
 if (!fs.existsSync(outputDir)) {
   fs.mkdirSync(outputDir);
 }
 app.use("/output", express.static(outputDir));
 
+/**
+ * 🎚 FFmpeg Filter Route
+ */
 app.post("/filter", upload.single("file"), async (req, res) => {
   const auth = req.headers.authorization;
   if (auth !== "anon-secret") {
@@ -27,11 +34,18 @@ app.post("/filter", upload.single("file"), async (req, res) => {
   }
 
   const effect = req.body.effect;
+
   const filters = {
     raw: null,
     deep_echo: "aecho=0.8:0.9:1000:0.3",
-    whisper_of_peace: "highpass=f=300, aecho=0.9:0.88:60:0.4",
-    robotic_echo: "atempo=0.85, asetrate=44100*0.9"
+    bold_resonance: "bass=g=8, aecho=0.7:0.8:500:0.4",
+    gentle_whisper: "highpass=f=300, treble=g=6, volume=0.8",
+    soft_echo: "aecho=0.7:0.75:700:0.3, lowpass=f=2500",
+    serene_melody: "asetrate=44100*0.85, atempo=1.1",
+    bright_harmony: "treble=g=12, chorus=0.6:0.9:50:0.4:0.25:2",
+    anonymity_fade: "asetrate=44100*0.7, atempo=1.2",
+    whisper_of_peace: "highpass=f=600, lowpass=f=3500, volume=0.8",
+    echo_of_grace: "asetrate=44100*0.75, atempo=1.1, aecho=0.6:0.88:40:0.4"
   };
 
   const filterCommand = filters[effect];
@@ -42,10 +56,8 @@ app.post("/filter", upload.single("file"), async (req, res) => {
   let inputPath;
 
   if (req.file) {
-    // Uploaded file (mobile)
     inputPath = path.join(__dirname, req.file.path);
   } else if (req.body.file_url) {
-    // File from URL (FlutterFlow web)
     const tempName = `input_${uuidv4()}.mp3`;
     inputPath = path.join(__dirname, "uploads", tempName);
 
@@ -87,6 +99,80 @@ app.post("/filter", upload.single("file"), async (req, res) => {
     .save(outputPath);
 });
 
+/**
+ * 🤖 Resemble AI Upload (Clip Creation)
+ */
+app.post("/resemble/upload", async (req, res) => {
+  const { firebaseAudioUrl, voice_uuid, project_uuid } = req.body;
+
+  if (!firebaseAudioUrl || !voice_uuid || !project_uuid) {
+    return res.status(400).json({ error: "Missing required fields" });
+  }
+
+  try {
+    const response = await axios.post(
+      `https://api.resemble.ai/v1/projects/${project_uuid}/clips`,
+      {
+        voice_uuid: voice_uuid,
+        title: "AnonymousVoiceClip",
+        audio_source: firebaseAudioUrl,
+        is_active: true,
+      },
+      {
+        headers: {
+          Authorization: `Token NryQZFrSZ6f78iM2WbQUcQtt`,
+          "Content-Type": "application/json",
+        }
+      }
+    );
+
+    res.json(response.data);
+  } catch (error) {
+    console.error("❌ Resemble Upload Error:", error.response?.data || error.message);
+    res.status(500).json({ error: "Resemble upload failed", details: error.message });
+  }
+});
+
+/**
+ * 🌀 Resemble Audio Proxy Download
+ */
+app.post("/resemble/download", async (req, res) => {
+  const { audioUrl } = req.body;
+  const auth = req.headers.authorization;
+
+  if (auth !== "anon-secret") {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+
+  if (!audioUrl) {
+    return res.status(400).json({ error: "Missing audioUrl" });
+  }
+
+  try {
+    const outputName = `resemble_${Date.now()}.mp3`;
+    const outputPath = path.join(__dirname, "output", outputName);
+
+    const response = await axios.get(audioUrl, {
+      responseType: "stream",
+    });
+
+    const writer = fs.createWriteStream(outputPath);
+    response.data.pipe(writer);
+
+    writer.on("finish", () => {
+      res.json({ proxy_url: `/output/${outputName}` });
+    });
+
+    writer.on("error", (err) => {
+      console.error("❌ Error writing Resemble file:", err.message);
+      res.status(500).json({ error: "Failed to save Resemble audio" });
+    });
+  } catch (err) {
+    console.error("❌ Resemble proxy error:", err.message);
+    res.status(500).json({ error: "Resemble download failed" });
+  }
+});
+
 app.listen(PORT, () => {
-  console.log(`🚀 Server started on port ${PORT}`);
+  console.log(`🌍 Unified server is running on port ${PORT}`);
 });
