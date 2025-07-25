@@ -23,7 +23,7 @@ export default async function handler(req, res) {
       },
       {
         headers: {
-          Authorization: `Token NryQZFrSZ6f78iM2WbQUcQtt`,  // Replace with your Resemble API Token
+          Authorization: `Token GnGcq71mRhFH38gXn0WksAtt`,  // Replace with your Resemble API Token
           "Content-Type": "application/json"
         }
       }
