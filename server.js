@@ -116,7 +116,7 @@ app.post("/resemble/upload", async (req, res) => {
 
   try {
     const response = await axios.post(
-      "https://your-vercel-project.vercel.app/api/proxy",  // Vercel Proxy URL
+      "https://anonymous-voice-filters.vercel.app/api/proxy",  // Vercel Proxy URL
       {
         firebaseAudioUrl,
         voice_uuid,
