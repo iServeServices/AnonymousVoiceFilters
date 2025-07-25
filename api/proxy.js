@@ -31,10 +31,13 @@ export default async function handler(req, res) {
 
     res.status(200).json(response.data);
   } catch (err) {
-    console.error("❌ Proxy error:", err.message);
-    res.status(500).json({
-      error: "Resemble upload failed",
-      details: err.message
-    });
-  }
+  console.error("❌ Resemble Upload Error:", {
+    status: err?.response?.status,
+    message: err?.message,
+    data: err?.response?.data,
+  });
+  return res.status(500).json({
+    error: "Resemble upload failed",
+    details: err?.response?.data || err.message
+  });
 }
