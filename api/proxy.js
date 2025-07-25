@@ -1,5 +1,4 @@
 // /api/proxy.js
-
 import axios from "axios";
 
 export default async function handler(req, res) {
@@ -24,18 +23,18 @@ export default async function handler(req, res) {
       },
       {
         headers: {
-          Authorization: `Token NryQZFrSZ6f78iM2WbQUcQtt`, // This should be an actual token
+          Authorization: `Token NryQZFrSZ6f78iM2WbQUcQtt`,  // Replace with your Resemble API Token
           "Content-Type": "application/json"
         }
       }
     );
 
-    return res.status(200).json(response.data);
+    res.status(200).json(response.data);
   } catch (err) {
-    console.error("❌ Resemble Upload Error:", err.response?.data || err.message);
-    return res.status(500).json({
+    console.error("❌ Proxy error:", err.message);
+    res.status(500).json({
       error: "Resemble upload failed",
-      details: err.response?.data || err.message
+      details: err.message
     });
   }
 }
