@@ -12,8 +12,8 @@ import { fileURLToPath } from "url"; // Import to handle file URLs
 import { dirname } from "path"; // Import to get the current directory
 
 // Get the current directory using import.meta.url
-const __filename = fileURLToPath(import.meta.url); // Corrected here
-const _dirname = dirname(_filename); // This replaces __dirname for ES Modules
+const __filename = fileURLToPath(import.meta.url);  // Corrected to __filename
+const __dirname = dirname(__filename); // This replaces __dirname for ES Modules
 
 const app = express();
 const PORT = process.env.PORT || 10000;
