@@ -23,21 +23,24 @@ export default async function handler(req, res) {
       },
       {
         headers: {
-          Authorization: `Token GnGcq71mRhFH38gXn0WksAtt`,  // Replace with your Resemble API Token
+          Authorization: `Token GnGcq71mRhFH38gXn0WksAtt`,  // Replace with your actual token
           "Content-Type": "application/json"
         }
       }
     );
 
     res.status(200).json(response.data);
+
   } catch (err) {
-  console.error("❌ Resemble Upload Error:", {
-    status: err?.response?.status,
-    message: err?.message,
-    data: err?.response?.data,
-  });
-  return res.status(500).json({
-    error: "Resemble upload failed",
-    details: err?.response?.data || err.message
-  });
+    console.error("❌ Resemble Upload Error:", {
+      status: err?.response?.status,
+      message: err?.message,
+      data: err?.response?.data,
+    });
+
+    return res.status(500).json({
+      error: "Resemble upload failed",
+      details: err?.response?.data || err.message
+    });
+  }
 }
