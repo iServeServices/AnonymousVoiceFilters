@@ -1,5 +1,4 @@
 // /server.js
-//Let's see
 
 import express from "express";
 import multer from "multer";
@@ -9,6 +8,12 @@ import fs from "fs";
 import cors from "cors";
 import axios from "axios";
 import { v4 as uuidv4 } from "uuid";
+import { fileURLToPath } from "url"; // Import to handle file URLs
+import { dirname } from "path"; // Import to get the current directory
+
+// Get the current directory using import.meta.url
+const __filename = fileURLToPath(import.meta.url);
+const _dirname = dirname(_filename); // This replaces __dirname for ES Modules
 
 const app = express();
 const PORT = process.env.PORT || 10000;
