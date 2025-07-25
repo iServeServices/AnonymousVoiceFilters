@@ -12,7 +12,7 @@ import { fileURLToPath } from "url"; // Import to handle file URLs
 import { dirname } from "path"; // Import to get the current directory
 
 // Get the current directory using import.meta.url
-const __filename = fileURLToPath(import.meta.url);
+const __filename = fileURLToPath(import.meta.url); // Corrected here
 const _dirname = dirname(_filename); // This replaces __dirname for ES Modules
 
 const app = express();
