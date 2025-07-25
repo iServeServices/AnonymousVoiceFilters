@@ -116,18 +116,11 @@ app.post("/resemble/upload", async (req, res) => {
 
   try {
     const response = await axios.post(
-      `https://api.resemble.ai/v1/projects/${project_uuid}/clips`,
+      "https://your-vercel-project.vercel.app/api/proxy",  // Vercel Proxy URL
       {
-        voice_uuid: voice_uuid,
-        title: "AnonymousVoiceClip",
-        audio_source: firebaseAudioUrl,
-        is_active: true,
-      },
-      {
-        headers: {
-          Authorization: `Token NryQZFrSZ6f78iM2WbQUcQtt`,
-          "Content-Type": "application/json",
-        }
+        firebaseAudioUrl,
+        voice_uuid,
+        project_uuid
       }
     );
 
