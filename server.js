@@ -35,20 +35,20 @@ app.post("/filter", upload.single("file"), async (req, res) => {
     return res.status(401).json({ error: "Unauthorized" });
   }
 
-  const effect = req.body.effect;
-  const filters = {
-    raw: null,
-    deep_echo: "aecho=0.8:0.9:1000:0.3",
-    bold_resonance: "bass=g=8, aecho=0.7:0.8:500:0.4",
-    gentle_whisper: "highpass=f=300, treble=g=6, volume=0.8",
-    soft_echo: "aecho=0.7:0.75:700:0.3, lowpass=f=2500",
-    serene_melody: "asetrate=44100*0.85, atempo=1.1",
-    bright_harmony: "treble=g=12, chorus=0.6:0.9:50:0.4:0.25:2",
-    anonymity_fade: "asetrate=44100*0.7, atempo=1.2",
-    whisper_of_peace: "highpass=f=600, lowpass=f=3500, volume=0.8",
-    echo_of_grace: "asetrate=44100*0.75, atempo=1.1, aecho=0.6:0.88:40:0.4"
-  };
+const effect = req.body.effect;
+const filters = {
+  raw: null,  // No filter
 
+  deep_echo: "aecho=0.6:0.7:700:0.25",  // Softer, less overlap
+  bold_resonance: "bass=g=6, aecho=0.6:0.7:400:0.3",  // Reduced echo tails
+  gentle_whisper: "highpass=f=500, treble=g=4, volume=0.9",  // Clearer highs
+  soft_echo: "aecho=0.5:0.6:600:0.2, lowpass=f=2500",  // Mellowed echo
+  serene_melody: "asetrate=44100*0.9, atempo=1.05",  // Less warble
+  bright_harmony: "treble=g=6, chorus=0.5:0.9:30:0.3:0.25:2",  // Smoother chorus
+  anonymity_fade: "asetrate=44100*0.75, atempo=1.15",  // Balanced fade effect
+  whisper_of_peace: "highpass=f=600, lowpass=f=3500, volume=0.85",  // More clarity
+  echo_of_grace: "asetrate=44100*0.8, atempo=1.05, aecho=0.5:0.7:30:0.3"  // Gentler grace echo
+};
   const filterCommand = filters[effect];
   if (!filterCommand && effect !== "raw") {
     return res.status(400).json({ error: "Unknown filter effect" });
