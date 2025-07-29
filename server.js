@@ -41,7 +41,7 @@ const filters = {
 
   deep_echo: "aecho=0.6:0.7:700:0.25",  // Softer, less overlap
   bold_resonance: "asetrate=44100*0.9, atempo=1.1, bass=g=5, treble=g=-4, volume=1.2",  // Reduced echo tails
-  gentle_whisper: "asetrate=70100*0.9, atempo=1.0, bass=g=25, volume=1.1",  // Clearer highs
+  gentle_whisper: "asetrate=60100*0.9, atempo=1.1, bass=g=25, volume=1.1",  // Clearer highs
   soft_echo: "aecho=0.5:0.6:600:0.2, lowpass=f=2500",  // Mellowed echo
   serene_melody: "asetrate=44100*0.9, atempo=1.05",  // Less warble
   bright_harmony: "treble=g=6, chorus=0.5:0.9:30:0.3:0.25:2",  // Smoother chorus
