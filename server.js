@@ -1,3 +1,4 @@
+
 // /server.js
 
 import express from "express";
@@ -8,12 +9,12 @@ import fs from "fs";
 import cors from "cors";
 import axios from "axios";
 import { v4 as uuidv4 } from "uuid";
-import { fileURLToPath } from "url"; // Import to handle file URLs
-import { dirname } from "path"; // Import to get the current directory
+import { fileURLToPath } from "url";
+import { dirname } from "path";
 
-// Get the current directory using import.meta.url
-const __filename = fileURLToPath(import.meta.url);  // Corrected to __filename
-const __dirname = dirname(__filename); // This replaces __dirname for ES Modules
+// Fix for ES modules: resolve __dirname and __filename
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 const app = express();
 const PORT = process.env.PORT || 10000;
@@ -22,16 +23,12 @@ app.use(cors());
 app.use(express.json());
 const upload = multer({ dest: "uploads/" });
 
-// Ensure output folder exists
 const outputDir = path.join(__dirname, "output");
 if (!fs.existsSync(outputDir)) {
   fs.mkdirSync(outputDir);
 }
 app.use("/output", express.static(outputDir));
 
-/**
- * 🎚 FFmpeg Filter Route
- */
 app.post("/filter", upload.single("file"), async (req, res) => {
   const auth = req.headers.authorization;
   if (auth !== "anon-secret") {
@@ -39,7 +36,6 @@ app.post("/filter", upload.single("file"), async (req, res) => {
   }
 
   const effect = req.body.effect;
-
   const filters = {
     raw: null,
     deep_echo: "aecho=0.8:0.9:1000:0.3",
@@ -59,13 +55,11 @@ app.post("/filter", upload.single("file"), async (req, res) => {
   }
 
   let inputPath;
-
   if (req.file) {
     inputPath = path.join(__dirname, req.file.path);
   } else if (req.body.file_url) {
     const tempName = `input_${uuidv4()}.mp3`;
     inputPath = path.join(__dirname, "uploads", tempName);
-
     try {
       const response = await axios.get(req.body.file_url, { responseType: "stream" });
       const writer = fs.createWriteStream(inputPath);
@@ -90,10 +84,8 @@ app.post("/filter", upload.single("file"), async (req, res) => {
   }
 
   command
-    .on("start", cmd => {
-      console.log("🛠 FFmpeg command:", cmd);
-    })
-    .on("error", (err) => {
+    .on("start", cmd => console.log("🛠 FFmpeg command:", cmd))
+    .on("error", err => {
       console.error("❌ FFmpeg error:", err.message);
       res.status(500).json({ error: "Filter failed", details: err.message });
     })
@@ -104,26 +96,17 @@ app.post("/filter", upload.single("file"), async (req, res) => {
     .save(outputPath);
 });
 
-/**
- * 🤖 Resemble AI Upload (Clip Creation)
- */
 app.post("/resemble/upload", async (req, res) => {
   const { firebaseAudioUrl, voice_uuid, project_uuid } = req.body;
-
   if (!firebaseAudioUrl || !voice_uuid || !project_uuid) {
     return res.status(400).json({ error: "Missing required fields" });
   }
 
   try {
     const response = await axios.post(
-      "https://anonymous-voice-filters.vercel.app/api/proxy",  // Vercel Proxy URL
-      {
-        firebaseAudioUrl,
-        voice_uuid,
-        project_uuid
-      }
+      "https://anonymous-voice-filters.vercel.app/api/proxy",
+      { firebaseAudioUrl, voice_uuid, project_uuid }
     );
-
     res.json(response.data);
   } catch (error) {
     console.error("❌ Resemble Upload Error:", error.response?.data || error.message);
@@ -131,17 +114,12 @@ app.post("/resemble/upload", async (req, res) => {
   }
 });
 
-/**
- * 🌀 Resemble Audio Proxy Download
- */
 app.post("/resemble/download", async (req, res) => {
   const { audioUrl } = req.body;
   const auth = req.headers.authorization;
-
   if (auth !== "anon-secret") {
     return res.status(401).json({ error: "Unauthorized" });
   }
-
   if (!audioUrl) {
     return res.status(400).json({ error: "Missing audioUrl" });
   }
@@ -149,19 +127,11 @@ app.post("/resemble/download", async (req, res) => {
   try {
     const outputName = `resemble_${Date.now()}.mp3`;
     const outputPath = path.join(__dirname, "output", outputName);
-
-    const response = await axios.get(audioUrl, {
-      responseType: "stream",
-    });
-
+    const response = await axios.get(audioUrl, { responseType: "stream" });
     const writer = fs.createWriteStream(outputPath);
     response.data.pipe(writer);
-
-    writer.on("finish", () => {
-      res.json({ proxy_url: `/output/${outputName}` });
-    });
-
-    writer.on("error", (err) => {
+    writer.on("finish", () => res.json({ proxy_url: `/output/${outputName}` }));
+    writer.on("error", err => {
       console.error("❌ Error writing Resemble file:", err.message);
       res.status(500).json({ error: "Failed to save Resemble audio" });
     });
